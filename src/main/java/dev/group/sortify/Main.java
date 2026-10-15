@@ -27,7 +27,7 @@ public class Main
 
         Map<String,Consumer<String>> commands = new HashMap<>();
         commands.put("add_random", input ->{
-            System.out.println("Сколько студентов сгенерировать? > ");
+            System.out.print("Сколько студентов сгенерировать? > ");
             int count = 0;
             while (true){
                 try {
@@ -52,9 +52,8 @@ public class Main
             add.addStudents();
         });
 
-        // Команда: Из файла
         commands.put("add", input -> {
-            add.setStrategy(new FileStudentStrategy("data/list_std.txt"));
+            add.setStrategy(new FileStudentStrategy(scanner));
             add.addStudents();
         });
         commands.put("write",input -> {addF.writeFile();

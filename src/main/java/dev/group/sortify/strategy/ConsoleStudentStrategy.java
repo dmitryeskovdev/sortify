@@ -17,7 +17,7 @@ public class ConsoleStudentStrategy implements StudentGenerationStrategy {
     public List<Student> generate() {
         List<Student> result = new ArrayList<>();
 
-        // Вся твоя логика ввода переносится сюда
+      
         String fio;
         while (true) {
             System.out.print("Введите ФИО > ");
