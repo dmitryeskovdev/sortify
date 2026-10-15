@@ -9,38 +9,52 @@ import java.util.List;
 import java.util.Scanner;
 
 public class FileStudentStrategy implements StudentGenerationStrategy{
-    private final String filePath;
-
-    public FileStudentStrategy(String filePath) {
-        this.filePath = filePath;
+    private final Scanner scanner;
+    public FileStudentStrategy(Scanner scanner) {
+        this.scanner = scanner;
     }
     @Override
     public List<Student> generate() {
-        List<Student> result = new ArrayList<>();
+        System.out.print("Введите название файла (без расширения .txt): > ");
+
+
+        String nameFile;
+        if (!scanner.hasNextLine()) {
+            return new ArrayList<>();
+        }
+        nameFile = scanner.nextLine().trim();
+
+        if (nameFile.isEmpty()) {
+            System.out.println("Имя файла не введено.");
+            return new ArrayList<>();
+        }
+
+        String filePath = "data/" + nameFile + ".txt";
         File file = new File(filePath);
 
         if (!file.exists()) {
             System.out.println("Файл не найден: " + filePath);
-            return result; // Возвращаем пустой список, не кидаем исключение
+            return new ArrayList<>();
         }
 
-        try (Scanner scanner = new Scanner(file)) {
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim();
+        List<Student> result = new ArrayList<>();
+        try (Scanner fileScanner = new Scanner(file)) {
+            while (fileScanner.hasNextLine()) {
+                String line = fileScanner.nextLine().trim();
                 if (line.isEmpty() || line.startsWith("#")) continue;
 
                 if (line.startsWith("Студент:")) {
                     String fio = line.split(":", 2)[1].trim();
 
-                    // Проверка наличия следующих строк внутри цикла
-                    if (!scanner.hasNextLine()) break;
-                    int numGroup = Integer.parseInt(scanner.nextLine().split(":", 2)[1].trim());
 
-                    if (!scanner.hasNextLine()) break;
-                    double averageScore = Double.parseDouble(scanner.nextLine().split(":", 2)[1].trim());
+                    if (!fileScanner.hasNextLine()) break;
+                    int numGroup = Integer.parseInt(fileScanner.nextLine().split(":", 2)[1].trim());
 
-                    if (!scanner.hasNextLine()) break;
-                    int studentIdNumber = Integer.parseInt(scanner.nextLine().split(":", 2)[1].trim());
+                    if (!fileScanner.hasNextLine()) break;
+                    double averageScore = Double.parseDouble(fileScanner.nextLine().split(":", 2)[1].trim());
+
+                    if (!fileScanner.hasNextLine()) break;
+                    int studentIdNumber = Integer.parseInt(fileScanner.nextLine().split(":", 2)[1].trim());
 
                     result.add(new Student.Builder()
                             .fio(fio)

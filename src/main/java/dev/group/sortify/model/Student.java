@@ -26,7 +26,7 @@ public class Student {
     }
     @Override
     public String toString(){
-        return "ФИО студента: " +fio+"\nНомер группы: " + numGroup + "\nСредний балл: " + averageScore + "\nНомер зачётной книжки: " + studentIdNumber+"\n";
+        return "Студент: " +fio+"\nНомер группы: " + numGroup + "\nСредний балл: " + averageScore + "\nНомер зачётной книжки: " + studentIdNumber+"\n";
     }
     public static class Builder{
         private String fio;
