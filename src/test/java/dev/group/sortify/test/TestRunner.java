@@ -8,6 +8,7 @@ import dev.group.sortify.comparator.GroupNumberComparator;
 import dev.group.sortify.comparator.GradePointAverageComparator;
 import dev.group.sortify.comparator.RecordBookNumberComparator;
 
+import dev.group.sortify.utils.ConsoleActions;
 
 public class TestRunner {
 
@@ -26,9 +27,9 @@ public class TestRunner {
 
     private static void printResult(String testName, boolean isPassed) {
         if (isPassed) {
-            System.out.println("Test: " + testName + " -> " + GREEN_BRIGHT + "PASS" + RESET);
+            ConsoleActions.printInfo("Test: " + testName + " -> " + GREEN_BRIGHT + "PASS" + RESET);
         } else {
-            System.out.println("Test: " + testName + " -> " + RED_BRIGHT + "FAIL" + RESET);
+            ConsoleActions.printInfo("Test: " + testName + " -> " + RED_BRIGHT + "FAIL" + RESET);
         }
     }
 
@@ -45,10 +46,10 @@ public class TestRunner {
             boolean passed = student.getGroupNumber() == 101
                     && "A123456Y2026".equals(student.getRecordBookNumber());
 
-            printResult("Student Builder & Properties", passed);
+            printResult("Student Builder", passed);
 
         } catch (Exception e) {
-            printResult("Student Builder & Properties", false);
+            printResult("Student Builder", false);
         }
     }
 
@@ -63,10 +64,10 @@ public class TestRunner {
 
             boolean passedSize = list.size() == 2;
             boolean passedArray = list.toArray().length == 2;
-            printResult("StudentList Addition & Array conversion", passedSize && passedArray);
+            printResult("StudentList", passedSize && passedArray);
 
         } catch (Exception e) {
-            printResult("StudentList Addition & Array conversion", false);
+            printResult("StudentList", false);
         }
     }
 
@@ -84,10 +85,10 @@ public class TestRunner {
             StudentComparator recordComp = new RecordBookNumberComparator();
             boolean recordPassed = recordComp.compare(s1, s2) < 0;
 
-            printResult("Student Comparators (Group, Grade, RecordBook)", groupPassed && gradePassed && recordPassed);
+            printResult("Student Comparators", groupPassed && gradePassed && recordPassed);
 
         } catch (Exception e) {
-            printResult("Student Comparators (Group, Grade, RecordBook)", false);
+            printResult("Student Comparators", false);
         }
     }
 
@@ -98,10 +99,10 @@ public class TestRunner {
 
             boolean passed = (actualCount == expectedCount);
 
-            printResult("StudentGenerationStrategy Simulation", passed);
+            printResult("StudentGenerationStrategy", passed);
 
         } catch (Exception e) {
-            printResult("StudentGenerationStrategy Simulation", false);
+            printResult("StudentGenerationStrategy", false);
         }
     }
 
@@ -118,10 +119,10 @@ public class TestRunner {
 
             boolean passed = array[0].getGroupNumber() == 200;
 
-            printResult("SortingStrategy (InsertionSort validation)", passed);
+            printResult("SortingStrategy", passed);
 
         } catch (Exception e) {
-            printResult("SortingStrategy (InsertionSort validation)", false);
+            printResult("SortingStrategy", false);
         }
     }
 }

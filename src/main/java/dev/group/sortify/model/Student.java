@@ -23,7 +23,8 @@ public class Student {
 
     @Override
     public String toString() {
-        return String.format("Студент [Группа: %d, Средний балл: %.1f, Номер книжки: |%s|, Возраст: %d]",
+        return String.format("Студент %s [Группа: %d, Средний балл: %.1f, Номер книжки: |%s|, Возраст: %d]",
+                fullName,
                 groupNumber,
                 gradePointAverage,
                 recordBookNumber,

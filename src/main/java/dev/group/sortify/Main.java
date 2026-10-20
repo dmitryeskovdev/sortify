@@ -4,6 +4,10 @@ import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.Map;
 
+import dev.group.sortify.utils.ConsoleColors;
+
+import dev.group.sortify.utils.ConsoleActions;
+
 public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
@@ -12,7 +16,7 @@ public class Main {
     public static void main(String[] args) {
 
         CLI.handleWelcome();
-        CLI cli = new CLI();
+        CLI cli = new CLI(scanner);
         Map<String, Consumer<String>> commands = cli.getCommands();
 
         while (true) {
@@ -20,11 +24,16 @@ public class Main {
             String line = scanner.nextLine().trim().toLowerCase();
 
             if (line.equalsIgnoreCase(STOP_WORD)) {
-                System.out.println("Программа завершена.");
+                ConsoleActions.printInfo("Программа завершена.");
                 break;
             }
 
             if (line.isEmpty()) {
+                continue;
+            }
+
+            if (line.equals("clear")) {
+                ConsoleActions.clearConsole();
                 continue;
             }
 
@@ -33,7 +42,7 @@ public class Main {
             if (action != null) {
                 action.accept(line);
             } else {
-                System.out.println("Неизвестная команда: " + line + ". Попробуйте снова.");
+                ConsoleActions.printError("Неизвестная команда: " + line + ". Попробуйте снова.");
             }
         }
 

@@ -1,11 +1,9 @@
 package dev.group.sortify.generator;
 
 import dev.group.sortify.collection.StudentList;
+import dev.group.sortify.model.Student;
 
-public class ConsoleStudentStrategy implements StudentGenerationStrategy {
-    @Override
-    public StudentList generate() {
-        return new StudentList();
-    }
-}
+import java.util.Scanner;
+
+public class ConsoleStudentStrategy {}
 

@@ -5,6 +5,11 @@ import dev.group.sortify.model.Student;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import java.util.Spliterators;
+import java.util.Spliterator;
+
 public class StudentList implements Iterable<Student> {
     private Student[] elements;
     private int size;
@@ -30,6 +35,23 @@ public class StudentList implements Iterable<Student> {
         return elements[index];
     }
 
+    public Student remove(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Индекс: " + index + ", Размер: " + size);
+        }
+
+        Student removed = elements[index];
+
+        int numberMoved = size - index - 1;
+        if (numberMoved > 0) {
+            System.arraycopy(elements, index + 1, elements, index, numberMoved);
+        }
+
+        elements[--size] = null;
+
+        return removed;
+    }
+
     public int size() {
         return size;
     }
@@ -45,6 +67,17 @@ public class StudentList implements Iterable<Student> {
         Student[] result = new Student[this.size];
         System.arraycopy(this.elements, 0, result, 0, this.size);
         return result;
+    }
+
+    public Stream<Student> stream() {
+        return StreamSupport.stream(
+                Spliterators.spliterator(
+                        this.iterator(),
+                        this.size(),
+                        Spliterator.ORDERED | Spliterator.SIZED
+                ),
+                false
+        );
     }
 
     @Override
