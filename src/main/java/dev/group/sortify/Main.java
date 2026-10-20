@@ -2,7 +2,7 @@ package dev.group.sortify;
 
 import dev.group.sortify.model.Student;
 import dev.group.sortify.service.AddInFile;
-import dev.group.sortify.service.Sort;
+import dev.group.sortify.service.Sorter;
 import dev.group.sortify.service.StudentAdd;
 import dev.group.sortify.strategy.ConsoleStudentStrategy;
 import dev.group.sortify.strategy.FileStudentStrategy;
@@ -20,14 +20,12 @@ public class Main
         StudentAdd add = new StudentAdd(null);
 
         List<Student> students = add.getStudents();
-
-        Sort sort = new Sort(students);
         AddInFile addF = new AddInFile(students);
-
+        Sorter sorter = new Sorter(students);
 
         Map<String,Consumer<String>> commands = new HashMap<>();
         commands.put("add_random", input ->{
-            System.out.print("Сколько студентов сгенерировать? > ");
+            System.out.println("Сколько студентов сгенерировать? > ");
             int count = 0;
             while (true){
                 try {
@@ -52,7 +50,8 @@ public class Main
             add.addStudents();
         });
 
-        commands.put("add", input -> {
+        // Команда: Из файла
+        commands.put("add_f", input -> {
             add.setStrategy(new FileStudentStrategy(scanner));
             add.addStudents();
         });
@@ -61,12 +60,45 @@ public class Main
         commands.put("print", input ->{
             System.out.println(students);
         });
-        commands.put("sort",input ->{
-            sort.sort();
+        commands.put("sort_fio", input -> {
+            sorter.sort(Comparator.comparing(Student::getFio, String.CASE_INSENSITIVE_ORDER));
+            System.out.println("Отсортировано по ФИО.");
         });
-        commands.put("help", input ->{
-            System.out.println("Команды:\n print - выводит список студентов;\n add - добавляет в список данные из файла;" +
-                    "\n write - записывает данные в файл;\n sort - сортирует список по полю ФИО;\n add_con - ввод данных в консоли\n add_random - рандомное пополнение студентов");
+
+
+        commands.put("sort_group", input -> {
+            sorter.sort(Comparator.comparingInt(Student::getNumGroup));
+            System.out.println("Отсортировано по номеру группы.");
+        });
+
+
+        commands.put("sort_score", input -> {
+            sorter.sort(Comparator.comparingDouble(Student::getAverageScore).reversed());
+            System.out.println("Отсортировано по среднему баллу.");
+        });
+        commands.put("sort_id", input -> {
+            sorter.sort(Comparator.comparingDouble(Student::getStudentIdNumber).reversed());
+            System.out.println("Отсортировано по среднему баллу.");
+        });
+        commands.put("sort_even", input -> {
+            sorter.sortEvenGroupsKeepOddPositions();
+            System.out.println("Отсортированы только чётные группы (нечётные на местах).");
+        });
+        commands.put("help", input -> {
+            System.out.println(
+                    "Команды:\n" +
+                            "  print       - выводит список студентов;\n" +
+                            "  add_f         - добавляет из файла;\n" +
+                            "  add_con     - ввод с консоли;\n" +
+                            "  add_random  - рандомные студенты;\n" +
+                            "  write       - записать в файл;\n" +
+                            "  sort_fio    - сортировка по ФИО;\n" +
+                            "  sort_group  - сортировка по группе;\n" +
+                            "  sort_score  - сортировка по баллу;\n" +
+                            "  sort_all    - сортировка по номеру зачётной книжки;\n" +
+                            "  sort_even    - сортировка чётные нечётные;\n" +
+                            "  Exit        - выход."
+            );
         });
 
 
@@ -87,4 +119,5 @@ public class Main
         }
     }
 }
+
 
