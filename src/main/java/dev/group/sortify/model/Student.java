@@ -1,73 +1,68 @@
 package dev.group.sortify.model;
 
 public class Student {
-    private final String fio;
-    private final int numGroup;
-    private final double averageScore;
-    private final int studentIdNumber;
-    public Student(Builder builder)
-    {
-        this.fio = builder.fio;
-        this.numGroup = builder.numGroup;
-        this.averageScore = builder.averageScore;
-        this.studentIdNumber = builder.studentIdNumber;
+    private final String fullName;
+    private final int age;
+    private final int groupNumber;
+    private final double gradePointAverage;
+    private final String recordBookNumber;
+
+    private Student(Builder builder) {
+        this.fullName = builder.fullName;
+        this.age = builder.age;
+        this.groupNumber = builder.groupNumber;
+        this.gradePointAverage = builder.gradePointAverage;
+        this.recordBookNumber = builder.recordBookNumber;
     }
-    public String getFio(){
-        return fio;
-    }
-    public int getNumGroup(){
-        return numGroup;
-    }
-    public double getAverageScore(){
-        return averageScore;
-    }
-    public int getStudentIdNumber(){
-        return studentIdNumber;
-    }
+
+    public int getAge() { return age; }
+    public int getGroupNumber() { return groupNumber; }
+    public double getGradePointAverage() { return gradePointAverage; }
+    public String getRecordBookNumber() { return recordBookNumber; }
+    public String getFullName() { return fullName; }
+
     @Override
-    public String toString(){
-        return "Студент: " +fio+"\nНомер группы: " + numGroup + "\nСредний балл: " + averageScore + "\nНомер зачётной книжки: " + studentIdNumber+"\n";
+    public String toString() {
+        return String.format("Студент [Группа: %d, Средний балл: %.1f, Номер книжки: |%s|, Возраст: %d]",
+                groupNumber,
+                gradePointAverage,
+                recordBookNumber,
+                age);
     }
-    public static class Builder{
-        private String fio;
-        private int numGroup;
-        private double averageScore;
-        private int studentIdNumber;
-        public Builder fio(String fio){
-            if(fio == null || fio.isBlank()){
-                throw new IllegalArgumentException("Данные ФИО должны быть введены");
-            }
-            this.fio = fio;
+
+    public static class Builder {
+        private String fullName;
+        private int age;
+        private int groupNumber;
+        private double gradePointAverage;
+        private String recordBookNumber;
+
+        public Builder age(int age) {
+            this.age = age;
             return this;
         }
-        public Builder numGroup(int numGroup){
-            if(numGroup <=0){
-                throw new IllegalArgumentException("Номер группы не введён или введён некорректно");
-            }
-            this.numGroup = numGroup;
-            return this;
-        }
-        public Builder averageScore(double averageScore){
-            if(averageScore <= 0){
-                throw new IllegalArgumentException("Средний балл не введён или введён некорректно");
-            }
-            this.averageScore = averageScore;
-            return this;
-        }
-        public Builder studentIdNumber(int studentIdNumber){
-            if (studentIdNumber <= 0 ){
-                throw new IllegalArgumentException("Номер зачётной книжки не введён или введён некорректно");
-            }
-            this.studentIdNumber = studentIdNumber;
+        public Builder groupNumber(int groupNumber) {
+            this.groupNumber = groupNumber;
             return this;
         }
 
-        public Student build(){
-            if (fio.chars().anyMatch(Character::isDigit)){
-                throw new IllegalArgumentException("В ФИО присутствуют цифры или недопустимые символы");
-            }
-            return  new Student(this);
+        public Builder gradePointAverage(double gradePointAverage) {
+            this.gradePointAverage = gradePointAverage;
+            return this;
+        }
+
+        public Builder recordBookNumber(String recordBookNumber) {
+            this.recordBookNumber = recordBookNumber;
+            return this;
+        }
+
+        public Builder fullName(String fullName) {
+            this.fullName = fullName;
+            return this;
+        }
+
+        public Student build() {
+            return new Student(this);
         }
     }
 }
-
