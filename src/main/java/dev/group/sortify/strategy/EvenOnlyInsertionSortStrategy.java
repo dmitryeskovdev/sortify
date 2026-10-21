@@ -1,49 +1,52 @@
 package dev.group.sortify.strategy;
 
+import dev.group.sortify.comparator.AgeComparator;
 import dev.group.sortify.model.Student;
 import dev.group.sortify.comparator.StudentComparator;
 
 public class EvenOnlyInsertionSortStrategy implements SortingStrategy {
+    private final StudentComparator comparator;
+
+    public EvenOnlyInsertionSortStrategy(StudentComparator comparator) {
+        this.comparator = comparator;
+    }
 
     @Override
-    public void sort(Student[] students, StudentComparator comparator) {
-        if (students == null || students.length < 2) return;
+    public Student[] sort(Student[] students) {
+        if (students == null || students.length < 2) return students;
 
+        int evenCount = 0;
+        for (Student s : students) {
+            if (s.getAge() % 2 == 0) {
+                evenCount++;
+            }
+        }
+
+        if (evenCount < 2) return students;
+
+        Student[] evenStudents = new Student[evenCount];
+        int index = 0;
+        for (Student s : students) {
+            if (s.getAge() % 2 == 0) {
+                evenStudents[index++] = s;
+            }
+        }
+
+        SortingStrategy strategy = new InsertionSortStrategy(comparator);
+        Student[] sortedEvenStudents = strategy.sort(evenStudents);
+
+        for (Student s : sortedEvenStudents) {
+            System.out.println(s);
+        }
+
+        int evenIterator = 0;
         for (int i = 0; i < students.length; i++) {
-            if (students[i].getGroupNumber() % 2 != 0) {
-                continue;
-            }
-
-            Student key = students[i];
-
-            int j = findPreviousEvenIndex(students, i - 1);
-
-            while (j >= 0 && comparator.compare(students[j], key) > 0) {
-                int nextEvenIdx = findNextEvenIndex(students, j + 1);
-                students[nextEvenIdx] = students[j];
-                j = findPreviousEvenIndex(students, j - 1);
-            }
-
-            int targetIdx = findNextEvenIndex(students, j + 1);
-            students[targetIdx] = key;
-        }
-    }
-
-    private int findPreviousEvenIndex(Student[] students, int startIdx) {
-        for (int i = startIdx; i >= 0; i--) {
-            if (students[i].getGroupNumber() % 2 == 0) {
-                return i;
+            if (students[i].getAge() % 2 == 0) {
+                students[i] = sortedEvenStudents[evenIterator++];
             }
         }
-        return -1;
+
+        return students;
     }
 
-    private int findNextEvenIndex(Student[] students, int startIdx) {
-        for (int i = startIdx; i < students.length; i++) {
-            if (students[i].getGroupNumber() % 2 == 0) {
-                return i;
-            }
-        }
-        return startIdx;
-    }
 }

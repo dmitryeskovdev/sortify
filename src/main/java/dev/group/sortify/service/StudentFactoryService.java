@@ -11,9 +11,6 @@ public class StudentFactoryService {
     }
 
     public StudentList createStudents() {
-        if (strategy == null) {
-            throw new IllegalStateException("Стратегия создания коллекции не установлена");
-        }
         return strategy.generate();
     }
 

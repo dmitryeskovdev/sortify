@@ -2,22 +2,22 @@ package dev.group.sortify;
 
 import dev.group.sortify.collection.StudentList;
 
-import dev.group.sortify.generator.EmptyStudentStrategy;
+import dev.group.sortify.comparator.AgeComparator;
+import dev.group.sortify.comparator.GroupNumberComparator;
+import dev.group.sortify.comparator.GradePointAverageComparator;
+import dev.group.sortify.comparator.RecordBookNumberComparator;
+
 import dev.group.sortify.model.Student;
+
 import dev.group.sortify.service.StudentFactoryService;
+import dev.group.sortify.service.StudentSearchService;
 
+import dev.group.sortify.generator.EmptyStudentStrategy;
 import dev.group.sortify.generator.RandomStudentStrategy;
-import dev.group.sortify.generator.ConsoleStudentStrategy;
-import dev.group.sortify.generator.FileStudentStrategy;
 
+import dev.group.sortify.strategy.EvenOnlyInsertionSortStrategy;
 import dev.group.sortify.strategy.SortingStrategy;
 import dev.group.sortify.strategy.InsertionSortStrategy;
-import dev.group.sortify.strategy.EvenOnlyInsertionSortStrategy;
-
-import dev.group.sortify.comparator.StudentComparator;
-import dev.group.sortify.comparator.RecordBookNumberComparator;
-import dev.group.sortify.comparator.GradePointAverageComparator;
-import dev.group.sortify.comparator.GroupNumberComparator;
 
 import dev.group.sortify.utils.ConsoleActions;
 
@@ -140,7 +140,7 @@ public class CLI {
             String line = scanner.nextLine().trim();
             try {
                 age = Integer.parseInt(line);
-                if (age >= 18) break;
+                if (age >= 18 && age <= 80) break;
                 ConsoleActions.printInfo("Возраст должен быть от 18 до 80");
                 continue;
             } catch (NumberFormatException e) {
@@ -227,14 +227,150 @@ public class CLI {
     }
 
     private void handleSetStrategy(String command) {
+        int strategyNumber = 0;
+        while (true) {
+            ConsoleActions.printAction("1: Стандартная сортировка\n");
+            ConsoleActions.printAction("2: Четная сортировка\n");
+            ConsoleActions.printAction("Введите стратегию сортировки: ");
+            String line = scanner.nextLine().trim();
+            try {
+                strategyNumber = Integer.parseInt(line);
+                if (strategyNumber == 1 || strategyNumber == 2) break;
+                ConsoleActions.printInfo("Выберите допустимое значение");
+                continue;
+            } catch (NumberFormatException e) {
+                ConsoleActions.printInfo("Введено не число");
+                continue;
+            }
+        }
+
+        SortingStrategy selectedStrategy = switch (strategyNumber) {
+            case 1 -> {
+                int fieldNumber = 0;
+                while (true) {
+                    ConsoleActions.printAction("1: Сортировка по группе\n");
+                    ConsoleActions.printAction("2: Сортировка по среднему баллу\n");
+                    ConsoleActions.printAction("3: Сортировка по зачетной книжке\n");
+                    ConsoleActions.printAction("Введите поле для сортировки: ");
+                    String line = scanner.nextLine().trim();
+                    try {
+                        fieldNumber = Integer.parseInt(line);
+                        if (fieldNumber == 1 || fieldNumber == 2 || fieldNumber == 3) break;
+                        ConsoleActions.printInfo("Выберите допустимое значение");
+                    } catch (NumberFormatException e) {
+                        ConsoleActions.printInfo("Введено не число");
+                    }
+                }
+
+                yield switch (fieldNumber) {
+                    case 1 -> new InsertionSortStrategy(new GroupNumberComparator());
+                    case 2 -> new InsertionSortStrategy(new GradePointAverageComparator());
+                    case 3 -> new InsertionSortStrategy(new RecordBookNumberComparator());
+                    default -> null;
+                };
+            }
+
+            case 2 -> new EvenOnlyInsertionSortStrategy(new AgeComparator());
+            default -> null;
+        };
+
+        strategy = selectedStrategy;
 
     }
 
-    private void handleSort(String command) { System.out.println("Вызов " + command); }
+    private void handleSort(String command) {
+        if (students == null) {
+            ConsoleActions.printInfo("Коллекция не создана");
+            return;
+        } else if (students.size() == 0) {
+            ConsoleActions.printInfo("Коллекция еще не имеет элементов");
+            return;
+        }
 
-    private void handleSearch(String command) { System.out.println("Вызов " + command); }
+        if (strategy == null) {
+            ConsoleActions.printInfo("Не выбрана стратегия сортировки");
+            return;
+        }
 
-    private void handleSearchParallel(String command) { System.out.println("Вызов " + command); }
+        students = new StudentList(strategy.sort(students.toArray()));
+        ConsoleActions.printInfo("Произведена сортировка коллекции");
+    }
+
+    private void handleSearch(String command) {
+        if (students == null) {
+            ConsoleActions.printInfo("Коллекция не создана");
+            return;
+        } else if (students.size() == 0) {
+            ConsoleActions.printInfo("Коллекция еще не имеет элементов");
+            return;
+        }
+
+        int targetAge = 0;
+        while (true) {
+            ConsoleActions.printAction("Введите возраст поиска: ");
+            String line = scanner.nextLine().trim();
+            try {
+                targetAge = Integer.parseInt(line);
+                if (targetAge >= 18 && targetAge < 80) break;
+                ConsoleActions.printInfo("Возраст должен быть от 18 до 80");
+                continue;
+            } catch (NumberFormatException e) {
+                ConsoleActions.printInfo("Введено не число");
+            }
+        }
+
+        long startTime = System.nanoTime();
+        long count = StudentSearchService.searchAge(students, targetAge);
+        long endTime = System.nanoTime();
+
+        long durationNano = endTime - startTime;
+        double durationMilli = durationNano / 1000000.0;
+
+        if (count == -1) {
+            ConsoleActions.printInfo("Не найдено элементов");
+        } else {
+            ConsoleActions.printInfo("Количество найденных элементов " + count + ", найдено за время " + durationMilli + " мс");
+        }
+
+    }
+
+    private void handleSearchParallel(String command) {
+        if (students == null) {
+            ConsoleActions.printInfo("Коллекция не создана");
+            return;
+        } else if (students.size() == 0) {
+            ConsoleActions.printInfo("Коллекция еще не имеет элементов");
+            return;
+        }
+
+        int targetAge = 0;
+        while (true) {
+            ConsoleActions.printAction("Введите возраст поиска: ");
+            String line = scanner.nextLine().trim();
+            try {
+                targetAge = Integer.parseInt(line);
+                if (targetAge >= 18 && targetAge < 80) break;
+                ConsoleActions.printInfo("Возраст должен быть от 18 до 80");
+                continue;
+            } catch (NumberFormatException e) {
+                ConsoleActions.printInfo("Введено не число");
+            }
+        }
+
+        long startTime = System.nanoTime();
+        long count = StudentSearchService.searchParallelAge(students, targetAge);
+        long endTime = System.nanoTime();
+
+        long durationNano = endTime - startTime;
+        double durationMilli = durationNano / 1000000.0;
+
+        if (count == -1) {
+            ConsoleActions.printInfo("Не найдено элементов");
+        } else {
+            ConsoleActions.printInfo("Количество найденных элементов " + count + ", найдено за время " + durationMilli + " мс");
+        }
+
+    }
 
     private void handleHelp(String command) {
         System.out.println("Команды:\n" +

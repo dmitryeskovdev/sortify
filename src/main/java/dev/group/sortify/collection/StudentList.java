@@ -20,6 +20,12 @@ public class StudentList implements Iterable<Student> {
         this.size = 0;
     }
 
+    public StudentList(Student[] students) {
+        this.elements = new Student[students.length];
+        this.size = students.length;
+        System.arraycopy(students, 0, this.elements, 0, students.length);
+    }
+
     public void add(Student student) {
         if (size == elements.length) {
             grow();
@@ -77,6 +83,17 @@ public class StudentList implements Iterable<Student> {
                         Spliterator.ORDERED | Spliterator.SIZED
                 ),
                 false
+        );
+    }
+
+    public Stream<Student> parallelStream() {
+        return StreamSupport.stream(
+                Spliterators.spliterator(
+                        this.iterator(),
+                        this.size(),
+                        Spliterator.ORDERED | java.util.Spliterator.SIZED
+                ),
+                true
         );
     }
 
