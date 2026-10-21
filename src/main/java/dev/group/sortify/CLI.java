@@ -9,6 +9,7 @@ import dev.group.sortify.comparator.RecordBookNumberComparator;
 
 import dev.group.sortify.model.Student;
 
+import dev.group.sortify.service.FileService;
 import dev.group.sortify.service.StudentFactoryService;
 import dev.group.sortify.service.StudentSearchService;
 
@@ -33,6 +34,7 @@ public class CLI {
     private final StudentFactoryService factory;
     private StudentList students;
     private SortingStrategy strategy;
+    private FileService fileService;
 
     public CLI(Scanner scanner) {
         commands.put("print", this::handlePrint);
@@ -50,6 +52,7 @@ public class CLI {
         commands.put("help", this::handleHelp);
         this.scanner = scanner;
         this.factory = new StudentFactoryService();
+        this.fileService = new FileService();
     }
 
     public Map<String, Consumer<String>> getCommands() {
@@ -77,10 +80,23 @@ public class CLI {
     }
 
     private void handleReadFile(String command) {
-        System.out.println("Вызов " + command);
+        StudentList loadedData = fileService.loadFromFile();
+        if (loadedData != null && loadedData.size() > 0) {
+            this.students = loadedData;
+            ConsoleActions.printInfo(String.format("Успешно загружено студентов: %d", students.size()));
+        } else {
+            ConsoleActions.printInfo("Файл пуст или не содержит валидных данных.");
+        }
     }
 
-    private void handleWriteFile(String command) { System.out.println("Вызов " + command); }
+    private void handleWriteFile(String command) {
+        if (students == null || students.size() == 0) {
+            ConsoleActions.printError("Коллекция не создана или не имеет элементов");
+            return;
+        }
+        fileService.saveToFile(students);
+        ConsoleActions.printInfo(String.format("Успешно записано студентов: %d.%n", students.size()));
+    }
 
     private void handleCreateEmpty(String command) {
         factory.setStrategy(new EmptyStudentStrategy());

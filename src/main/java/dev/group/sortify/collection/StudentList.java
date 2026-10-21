@@ -5,6 +5,7 @@ import dev.group.sortify.model.Student;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.Spliterators;
@@ -94,6 +95,20 @@ public class StudentList implements Iterable<Student> {
                         Spliterator.ORDERED | java.util.Spliterator.SIZED
                 ),
                 true
+        );
+    }
+
+    public static Collector<Student, StudentList, StudentList> toStudentList() {
+        return Collector.of(
+                StudentList::new,
+                StudentList::add,
+                (left, right) -> {
+                    for (int i = 0; i < right.size(); i++) {
+                        left.add(right.get(i));
+                    }
+                    return left;
+                },
+                Collector.Characteristics.IDENTITY_FINISH
         );
     }
 

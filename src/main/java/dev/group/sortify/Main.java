@@ -12,6 +12,7 @@ public class Main {
 
     private static final Scanner scanner = new Scanner(System.in);
     private static final String STOP_WORD = "exit";
+    private static final String CLEAR_WORD = "clear";
 
     public static void main(String[] args) {
 
@@ -32,7 +33,7 @@ public class Main {
                 continue;
             }
 
-            if (line.equals("clear")) {
+            if (line.equals(CLEAR_WORD)) {
                 ConsoleActions.clearConsole();
                 continue;
             }
