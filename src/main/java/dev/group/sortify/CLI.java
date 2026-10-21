@@ -230,6 +230,7 @@ public class CLI {
                 .build();
 
         students.add(student);
+        ConsoleActions.printInfo("Добавлен элемент: " + student.toString());
     }
 
     private void handleRemove(String command) {
@@ -247,7 +248,7 @@ public class CLI {
             String line = scanner.nextLine().trim();
             try {
                 index = Integer.parseInt(line);
-                if (index > 0 && index < students.size()) {
+                if (index >= 0 && index < students.size()) {
                     Student removed = students.remove(index);
                     ConsoleActions.printInfo("Удален элемент с индексом " + index + "\n" + "Элемент: " + removed.toString());
                     break;
