@@ -1,13 +1,20 @@
 package dev.group.sortify.strategy;
 
-import dev.group.sortify.model.Student;
 import dev.group.sortify.comparator.StudentComparator;
+import dev.group.sortify.model.Student;
 
 public class InsertionSortStrategy implements SortingStrategy {
     private final StudentComparator comparator;
+    private final String strategyName;
 
     public InsertionSortStrategy(StudentComparator comparator) {
+        this.strategyName = "InsertionSortStrategy " + "by " + comparator.getComparatorName();
         this.comparator = comparator;
+    }
+
+    @Override
+    public String getStrategyName() {
+        return strategyName;
     }
 
     @Override

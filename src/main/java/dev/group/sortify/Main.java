@@ -1,12 +1,11 @@
 package dev.group.sortify;
 
-import java.util.Scanner;
-import java.util.function.Consumer;
-import java.util.Map;
-
+import dev.group.sortify.utils.ConsoleActions;
 import dev.group.sortify.utils.ConsoleColors;
 
-import dev.group.sortify.utils.ConsoleActions;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class Main {
 

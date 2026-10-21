@@ -4,17 +4,16 @@ import dev.group.sortify.model.Student;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import java.util.Spliterators;
-import java.util.Spliterator;
 
 public class StudentList implements Iterable<Student> {
+    private static final int DEFAULT_CAPACITY = 30;
     private Student[] elements;
     private int size;
-    private static final int DEFAULT_CAPACITY = 30;
 
     public StudentList() {
         this.elements = new Student[DEFAULT_CAPACITY];
@@ -25,6 +24,20 @@ public class StudentList implements Iterable<Student> {
         this.elements = new Student[students.length];
         this.size = students.length;
         System.arraycopy(students, 0, this.elements, 0, students.length);
+    }
+
+    public static Collector<Student, StudentList, StudentList> toStudentList() {
+        return Collector.of(
+                StudentList::new,
+                StudentList::add,
+                (left, right) -> {
+                    for (int i = 0; i < right.size(); i++) {
+                        left.add(right.get(i));
+                    }
+                    return left;
+                },
+                Collector.Characteristics.IDENTITY_FINISH
+        );
     }
 
     public void add(Student student) {
@@ -98,22 +111,10 @@ public class StudentList implements Iterable<Student> {
         );
     }
 
-    public static Collector<Student, StudentList, StudentList> toStudentList() {
-        return Collector.of(
-                StudentList::new,
-                StudentList::add,
-                (left, right) -> {
-                    for (int i = 0; i < right.size(); i++) {
-                        left.add(right.get(i));
-                    }
-                    return left;
-                },
-                Collector.Characteristics.IDENTITY_FINISH
-        );
-    }
-
     @Override
-    public Iterator<Student> iterator() { return new StudentIterator(this); }
+    public Iterator<Student> iterator() {
+        return new StudentIterator(this);
+    }
 
     private static class StudentIterator implements Iterator<Student> {
         private final StudentList list;

@@ -15,11 +15,25 @@ public class Student {
         this.recordBookNumber = builder.recordBookNumber;
     }
 
-    public int getAge() { return age; }
-    public int getGroupNumber() { return groupNumber; }
-    public double getGradePointAverage() { return gradePointAverage; }
-    public String getRecordBookNumber() { return recordBookNumber; }
-    public String getFullName() { return fullName; }
+    public int getAge() {
+        return age;
+    }
+
+    public int getGroupNumber() {
+        return groupNumber;
+    }
+
+    public double getGradePointAverage() {
+        return gradePointAverage;
+    }
+
+    public String getRecordBookNumber() {
+        return recordBookNumber;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
 
     @Override
     public String toString() {
@@ -42,6 +56,7 @@ public class Student {
             this.age = age;
             return this;
         }
+
         public Builder groupNumber(int groupNumber) {
             this.groupNumber = groupNumber;
             return this;

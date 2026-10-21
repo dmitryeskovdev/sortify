@@ -1,9 +1,8 @@
 package dev.group.sortify.service;
 
-import dev.group.sortify.model.Student;
 import dev.group.sortify.collection.StudentList;
+import dev.group.sortify.model.Student;
 import dev.group.sortify.model.StudentValidator;
-
 import dev.group.sortify.utils.ConsoleActions;
 
 import java.io.IOException;
@@ -27,12 +26,13 @@ public class FileService {
     private static final Pattern GRADE_PATTERN = Pattern.compile("Средний балл:\\s*(.*)");
     private static final Pattern BOOK_PATTERN = Pattern.compile("Номер зачётной книжки:\\s*(.*)");
 
-    public void saveToFile(StudentList students) {
+    public void saveToFile(StudentList students, String fileName) {
         if (students == null || students.size() == 0) {
             ConsoleActions.printInfo("Коллекция пуста, нет данных для записи");
             return;
         }
 
+        Path targetPath = Path.of(fileName);
         List<String> linesToWrite = new ArrayList<>();
 
         Stream.of(students.toArray())
@@ -46,28 +46,31 @@ public class FileService {
                 });
 
         try {
-            if (PATH.getParent() != null) {
-                Files.createDirectories(PATH.getParent());
+            if (targetPath.getParent() != null) {
+                Files.createDirectories(targetPath.getParent());
             }
 
-            Files.write(PATH, linesToWrite, StandardCharsets.UTF_8,
+            Files.write(targetPath, linesToWrite, StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.APPEND);
 
-            ConsoleActions.printInfo("Данные успешно дозаписаны в файл: " + PATH.toAbsolutePath());
+            ConsoleActions.printInfo("Данные успешно дозаписаны в файл: " + targetPath);
+            ConsoleActions.printInfo(String.format("Успешно записано студентов: %d.%n", students.size()));
         } catch (IOException e) {
             ConsoleActions.printError("Не удалось записать данные в файл: " + e.getMessage());
         }
     }
 
-    public StudentList loadFromFile() {
-        if (!Files.exists(PATH)) {
+    public StudentList loadFromFile(String fileName) {
+        Path targetPath = Path.of(fileName);
+
+        if (!Files.exists(targetPath)) {
             ConsoleActions.printError("Файл не найден");
-            return new StudentList();
+            return null;
         }
 
         try {
-            String content = Files.readString(PATH, StandardCharsets.UTF_8);
+            String content = Files.readString(targetPath, StandardCharsets.UTF_8);
 
             return Stream.of(content.split("\\r?\\n\\r?\\n"))
                     .map(String::trim)

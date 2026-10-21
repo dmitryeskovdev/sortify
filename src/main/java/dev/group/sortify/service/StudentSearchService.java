@@ -1,7 +1,6 @@
 package dev.group.sortify.service;
 
 import dev.group.sortify.collection.StudentList;
-import dev.group.sortify.model.Student;
 
 public class StudentSearchService {
 

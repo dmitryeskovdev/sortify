@@ -1,40 +1,34 @@
 package dev.group.sortify;
 
 import dev.group.sortify.collection.StudentList;
-
 import dev.group.sortify.comparator.AgeComparator;
-import dev.group.sortify.comparator.GroupNumberComparator;
 import dev.group.sortify.comparator.GradePointAverageComparator;
+import dev.group.sortify.comparator.GroupNumberComparator;
 import dev.group.sortify.comparator.RecordBookNumberComparator;
-
+import dev.group.sortify.generator.EmptyStudentStrategy;
+import dev.group.sortify.generator.RandomStudentStrategy;
 import dev.group.sortify.model.Student;
-
 import dev.group.sortify.service.FileService;
 import dev.group.sortify.service.StudentFactoryService;
 import dev.group.sortify.service.StudentSearchService;
-
-import dev.group.sortify.generator.EmptyStudentStrategy;
-import dev.group.sortify.generator.RandomStudentStrategy;
-
 import dev.group.sortify.strategy.EvenOnlyInsertionSortStrategy;
-import dev.group.sortify.strategy.SortingStrategy;
 import dev.group.sortify.strategy.InsertionSortStrategy;
-
+import dev.group.sortify.strategy.SortingStrategy;
 import dev.group.sortify.utils.ConsoleActions;
 
-import java.util.Scanner;
-import java.util.function.Consumer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 public class CLI {
     private final Map<String, Consumer<String>> commands = new HashMap<>();
     private final Scanner scanner;
     private final StudentFactoryService factory;
+    private final FileService fileService;
     private StudentList students;
     private SortingStrategy strategy;
-    private FileService fileService;
 
     public CLI(Scanner scanner) {
         commands.put("print", this::handlePrint);
@@ -46,6 +40,7 @@ public class CLI {
         commands.put("add", this::handleAdd);
         commands.put("remove", this::handleRemove);
         commands.put("set strategy", this::handleSetStrategy);
+        commands.put("get strategy", this::handleGetStrategy);
         commands.put("sort", this::handleSort);
         commands.put("search", this::handleSearch);
         commands.put("search parallel", this::handleSearchParallel);
@@ -53,6 +48,12 @@ public class CLI {
         this.scanner = scanner;
         this.factory = new StudentFactoryService();
         this.fileService = new FileService();
+    }
+
+    public static void handleWelcome() {
+        System.out.println("Sortify CLI");
+        System.out.println("Для вывода всех команд на экран воспользуйтесь командой 'help'");
+        System.out.println("Для выхода введите 'exit'");
     }
 
     public Map<String, Consumer<String>> getCommands() {
@@ -80,22 +81,41 @@ public class CLI {
     }
 
     private void handleReadFile(String command) {
-        StudentList loadedData = fileService.loadFromFile();
-        if (loadedData != null && loadedData.size() > 0) {
+        ConsoleActions.printAction("Введите путь к файлу для чтения (по умолчанию, data/students.txt): ");
+        String fileName = scanner.nextLine().trim();
+
+        if (fileName.isEmpty()) {
+            fileName = "data/students.txt";
+        }
+
+        StudentList loadedData = fileService.loadFromFile(fileName);
+        if (loadedData == null) {
+            return;
+        } else if (loadedData.size() > 0) {
             this.students = loadedData;
             ConsoleActions.printInfo(String.format("Успешно загружено студентов: %d", students.size()));
         } else {
-            ConsoleActions.printInfo("Файл пуст или не содержит валидных данных.");
+            this.students = loadedData;
+            ConsoleActions.printInfo("Файл не имеет данных для заполнения коллекции");
         }
+
     }
 
     private void handleWriteFile(String command) {
+
         if (students == null || students.size() == 0) {
             ConsoleActions.printError("Коллекция не создана или не имеет элементов");
             return;
         }
-        fileService.saveToFile(students);
-        ConsoleActions.printInfo(String.format("Успешно записано студентов: %d.%n", students.size()));
+
+        ConsoleActions.printAction("Введите путь к файлу для записи (по умолчанию, data/students.txt): ");
+        String fileName = scanner.nextLine().trim();
+
+        if (fileName.isEmpty()) {
+            fileName = "data/students.txt";
+        }
+
+        fileService.saveToFile(students, fileName);
     }
 
     private void handleCreateEmpty(String command) {
@@ -114,8 +134,7 @@ public class CLI {
                 count = Integer.parseInt(line);
                 if (count > 0) break;
                 ConsoleActions.printInfo("Число должно быть > 0");
-            }
-            catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 ConsoleActions.printError("Введите целое число");
             }
 
@@ -232,7 +251,7 @@ public class CLI {
                     Student removed = students.remove(index);
                     ConsoleActions.printInfo("Удален элемент с индексом " + index + "\n" + "Элемент: " + removed.toString());
                     break;
-                };
+                }
                 ConsoleActions.printInfo("Индекс должен быть от 0 до " + (students.size() - 1));
                 continue;
             } catch (NumberFormatException e) {
@@ -242,11 +261,19 @@ public class CLI {
 
     }
 
+    private void handleGetStrategy(String command) {
+        if (strategy == null) {
+            ConsoleActions.printInfo("Стратегия сортировки не установлена");
+            return;
+        }
+        ConsoleActions.printInfo("Установлена стратегия: " + strategy.getStrategyName());
+    }
+
     private void handleSetStrategy(String command) {
         int strategyNumber = 0;
         while (true) {
             ConsoleActions.printAction("1: Стандартная сортировка\n");
-            ConsoleActions.printAction("2: Четная сортировка\n");
+            ConsoleActions.printAction("2: Четная сортировка (по возрасту)\n");
             ConsoleActions.printAction("Введите стратегию сортировки: ");
             String line = scanner.nextLine().trim();
             try {
@@ -277,7 +304,7 @@ public class CLI {
                         ConsoleActions.printInfo("Введено не число");
                     }
                 }
-
+                ConsoleActions.printInfo("Стратегия сортировки установлена");
                 yield switch (fieldNumber) {
                     case 1 -> new InsertionSortStrategy(new GroupNumberComparator());
                     case 2 -> new InsertionSortStrategy(new GradePointAverageComparator());
@@ -286,7 +313,11 @@ public class CLI {
                 };
             }
 
-            case 2 -> new EvenOnlyInsertionSortStrategy(new AgeComparator());
+            case 2 -> {
+                ConsoleActions.printInfo("Стратегия сортировки установлена");
+                yield new EvenOnlyInsertionSortStrategy(new AgeComparator());
+            }
+
             default -> null;
         };
 
@@ -399,6 +430,7 @@ public class CLI {
                 "   add             - добавить элемент в коллекцию;\n" +
                 "   remove          - удалить элемент из коллекции;\n" +
                 "   set strategy    - установить стратегию сортировки коллекции;\n" +
+                "   get strategy    - текущая стратегия сортировки коллекции;\n" +
                 "   sort            - запустить сортировку коллекции;\n" +
                 "   search          - поиск количества элементов по возрасту;\n" +
                 "   search parallel - поиск количества элементов по возрасту (многопоточный режим);\n" +
@@ -406,12 +438,6 @@ public class CLI {
                 "   clear           - очистить консоль;\n" +
                 "   exit            - выход;"
         );
-    }
-
-    public static void handleWelcome() {
-        System.out.println("Sortify CLI");
-        System.out.println("Для вывода всех команд на экран воспользуйтесь командой 'help'");
-        System.out.println("Для выхода введите 'exit'");
     }
 
 }

@@ -1,13 +1,13 @@
 package dev.group.sortify.test;
 
 import dev.group.sortify.collection.StudentList;
-import dev.group.sortify.strategy.*;
-import dev.group.sortify.model.Student;
-import dev.group.sortify.comparator.StudentComparator;
-import dev.group.sortify.comparator.GroupNumberComparator;
 import dev.group.sortify.comparator.GradePointAverageComparator;
+import dev.group.sortify.comparator.GroupNumberComparator;
 import dev.group.sortify.comparator.RecordBookNumberComparator;
-
+import dev.group.sortify.comparator.StudentComparator;
+import dev.group.sortify.model.Student;
+import dev.group.sortify.strategy.InsertionSortStrategy;
+import dev.group.sortify.strategy.SortingStrategy;
 import dev.group.sortify.utils.ConsoleActions;
 
 public class TestRunner {
@@ -36,15 +36,17 @@ public class TestRunner {
     private static void testStudentBuilderAndProperties() {
         try {
             Student student = new Student.Builder()
-                    .fullName("Иванов Иван")
+                    .fullName("Иванов Иван Иванович")
                     .age(27)
                     .groupNumber(101)
                     .gradePointAverage(4.5)
-                    .recordBookNumber("A123456Y2026")
+                    .recordBookNumber("S1022025")
                     .build();
 
             boolean passed = student.getGroupNumber() == 101
-                    && "A123456Y2026".equals(student.getRecordBookNumber());
+                    && "S1022025".equals(student.getRecordBookNumber())
+                    && student.getAge() == 27
+                    && "Иванов Иван Иванович".equals(student.getFullName());
 
             printResult("Student Builder", passed);
 
@@ -56,8 +58,8 @@ public class TestRunner {
     private static void testStudentListAdditionAndIterable() {
         try {
             StudentList list = new StudentList();
-            Student s1 = new Student.Builder().fullName("Петров Петр").build();
-            Student s2 = new Student.Builder().fullName("Александров Александ").build();
+            Student s1 = new Student.Builder().fullName("Петров Петр Петрович").build();
+            Student s2 = new Student.Builder().fullName("Александров Александ Александрович").build();
 
             list.add(s1);
             list.add(s2);
@@ -73,8 +75,8 @@ public class TestRunner {
 
     private static void testStudentComparators() {
         try {
-            Student s1 = new Student.Builder().groupNumber(100).gradePointAverage(4.0).recordBookNumber("A111").build();
-            Student s2 = new Student.Builder().groupNumber(200).gradePointAverage(5.0).recordBookNumber("B222").build();
+            Student s1 = new Student.Builder().groupNumber(100).gradePointAverage(4.0).recordBookNumber("A1112023").build();
+            Student s2 = new Student.Builder().groupNumber(200).gradePointAverage(5.0).recordBookNumber("B2222023").build();
 
             StudentComparator groupComp = new GroupNumberComparator();
             boolean groupPassed = groupComp.compare(s1, s2) < 0;
@@ -113,9 +115,9 @@ public class TestRunner {
             Student s2 = new Student.Builder().groupNumber(200).build();
             Student[] array = {s1, s2};
 
-            SortingStrategy sortingStrategy = new InsertionSortStrategy();
+            SortingStrategy sortingStrategy = new InsertionSortStrategy(new GroupNumberComparator());
 
-            sortingStrategy.sort(array, new GroupNumberComparator());
+            sortingStrategy.sort(array);
 
             boolean passed = array[0].getGroupNumber() == 200;
 
